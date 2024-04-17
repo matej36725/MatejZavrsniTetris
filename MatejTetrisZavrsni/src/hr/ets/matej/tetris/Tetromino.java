@@ -24,7 +24,7 @@ public class Tetromino {
 
 	public void nacrtaj(TetrisPanel mainFrame, int x, int y) {
 		for (int i = 0; i < 4; i++) {
-			TetrominoColor bojaKvadratica = GamePlay.tetrominoColor[points[i].getColorIndex()];
+			TetrominoColor bojaKvadratica = GamePlay.getTetrominoColor(points[i].getColorIndex());
 			mainFrame.nacrtajKvadratic(x + points[i].getX(), y + points[i].getY(), bojaKvadratica);
 		}
 	}
@@ -33,6 +33,10 @@ public class Tetromino {
 		for (int i = 0; i < 4; i++) {
 			points[i].rotiraj(smjer);
 		}
+	}
+	
+	public Point[] getPoints() {
+		return points;
 	}
 
 	@Override

@@ -33,14 +33,14 @@ public class Tetris extends JFrame {
 		// zatvori na x
 		tetris.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
-		// centriraj
-		tetris.setLocationRelativeTo(null);
-		
 		tetrisPanel.setPreferredSize(new Dimension(300, 600));
 		tetrisPanel.setFocusable(true);
 		tetris.add(tetrisPanel);
 		
 		tetris.pack();
+		
+		// centriraj
+		tetris.setLocationRelativeTo(null);
 		tetris.setVisible(true);
 	}
 

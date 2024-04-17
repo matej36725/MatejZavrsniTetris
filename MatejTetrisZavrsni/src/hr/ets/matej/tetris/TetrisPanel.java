@@ -3,7 +3,6 @@
  */
 package hr.ets.matej.tetris;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
@@ -34,7 +33,8 @@ public class TetrisPanel extends JPanel implements KeyListener {
 	 * Pomak igrače plohe - Y.
 	 */
 	public static final int GAMEFIELD_POMAK_Y = 2;
-
+	
+	
 	/**
 	 * Koristi se za crtanje
 	 */
@@ -60,12 +60,9 @@ public class TetrisPanel extends JPanel implements KeyListener {
 		// pohrani graphics objekt
 		this.g = g;
 
-		// nacrtajKvadratic(g, 3, 5, new Color(200, 0, 200), new Color(150, 0, 150), new
-		// Color(100, 0, 100));
-		TetrominoColor podloga = new TetrominoColor(new Color(40, 40, 40), new Color(30, 30, 30), new Color(10, 10, 10));
-		for (int i = 0; i < 10; i++) {
-			for (int j = 0; j < 20; j++) {
-				nacrtajKvadratic(i + 2, j + 3, podloga);
+		for (int x = 0; x < 10; x++) {
+			for (int y = 0; y < 20; y++) {
+				nacrtajKvadratic(x + GAMEFIELD_POMAK_X, y + GAMEFIELD_POMAK_Y, GamePlay.getTetrominoColorXY(x, y));
 			}
 		}
 
@@ -128,7 +125,12 @@ public class TetrisPanel extends JPanel implements KeyListener {
 			gamePlay.rotiraj(true);
 		}
 		
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			gamePlay.spusti();
+		}
+		
 		System.out.println(gamePlay.getT().toString());
+		System.out.println("tx: " + gamePlay.getTx() + ", ty: " + gamePlay.getTy());
 		repaint();
 	}
 
