@@ -33,7 +33,7 @@ public class Tetris extends JFrame {
 		// zatvori na x
 		tetris.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		
-		tetrisPanel.setPreferredSize(new Dimension(300, 600));
+		tetrisPanel.setPreferredSize(new Dimension(400, 600));
 		tetrisPanel.setFocusable(true);
 		tetris.add(tetrisPanel);
 		

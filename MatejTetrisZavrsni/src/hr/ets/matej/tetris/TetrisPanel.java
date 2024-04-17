@@ -82,6 +82,10 @@ public class TetrisPanel extends JPanel implements KeyListener {
 		Tetromino trenutni = gamePlay.getT();
 		trenutni.nacrtaj(this, GAMEFIELD_POMAK_X + gamePlay.getTx(), GAMEFIELD_POMAK_Y + gamePlay.getTy());
 		
+		// iscrtaj slijedću
+		Tetromino slijedeci = gamePlay.getNext();
+		slijedeci.nacrtaj(this, GAMEFIELD_POMAK_X + 12, GAMEFIELD_POMAK_Y + 2);
+		
 	}
 
 	public void nacrtajKvadratic(int x, int y, TetrominoColor color) {
