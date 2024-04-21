@@ -5,10 +5,12 @@ package hr.ets.matej.tetris;
 
 import java.awt.Color;
 
+import java.util.Timer;
+import java.util.TimerTask;
 /**
  * 
  */
-public class GamePlay {
+public class GamePlay extends TimerTask {
 	/**
 	 * index boje praznog polja
 	 */
@@ -28,6 +30,11 @@ public class GamePlay {
 	 * Igrače polje
 	 */
 	private static int[][] polje = new int[10][20];
+	
+	/**
+	 * Definira konstantu za pojedini novi - koliko se linija za 1 frame figura pomakne (vrijenosti su bazirane na 60 fameova u sekundi)
+	 */
+	private static float[] gravity = new float[] {0.01667f, 0.021017f, 0.026977f, 0.035256f, 0.04693f, 0.06361f, 0.0879f, 0.1236f, 0.1775f, 0.2598f, 0.388f, 0.59f, 0.92f, 1.46f, 2.36f};
 	
 
 	/**
@@ -55,6 +62,7 @@ public class GamePlay {
 		tetromino[6] = new Tetromino(new Point(1, 3, 6), new Point(1, 2, 6), new Point(2, 2, 6), new Point(2, 1, 6)); // Z
 	}
 
+	private TetrisPanel tetrisPanel;
 	private long score;
 	private int nivo;
 	private int linije;
@@ -62,15 +70,20 @@ public class GamePlay {
 	private Tetromino next;
 	private Tetromino t;
 	private int tx, ty;
+	private Timer timer = new Timer();
+	private float pomakTetromino;
 
-	public GamePlay() {
+	public GamePlay(TetrisPanel tetrisPanel) {
 		newGame();
 		highScore = 0;
+		this.tetrisPanel = tetrisPanel;
+		
+		timer.scheduleAtFixedRate(this, 0, 50);
 	}
 
 	public void newGame() {
-		score = 0;
-		nivo = 1;
+		score = 0L;
+		nivo = 0;
 		linije = 0;
 		
 		// postavi vrijednosti polja na prazno
@@ -85,12 +98,15 @@ public class GamePlay {
 	}
 	
 	public void sljedeciTetromino() {
+		pomakTetromino = 0f;
 		t = next;
 		next = odaberiRandomTetromino();
 		if (provjeriPozicijuTetromina(3, -1, t)) {
 			ty = -1;
-		} else {
+		} else if (provjeriPozicijuTetromina(3, 0, t)){
 			ty = 0;
+		} else {
+			gameEnd();
 		}
 		tx = 3;
 	}
@@ -161,6 +177,7 @@ public class GamePlay {
 	}
 	
 	 public void ukloniPuneLinije() {
+		 int brLn = 0;
 		 for (int y = 19; y > 0; y--) {
 			 boolean puno = true;
 			 //provjera dali je linija puna
@@ -172,6 +189,7 @@ public class GamePlay {
 			 }
 			 
 			 if (puno) {
+				 brLn += 1;
 				 //spusti sve linije iznad y za 1
 				 for (int y1 = y - 1; y1 >= 0; y1--) {
 					 for (int x = 0; x < 9; x++) {
@@ -180,7 +198,48 @@ public class GamePlay {
 				 }
 			 }
 		 }
+		 
+		 switch (brLn) {
+			 case 1:
+				 score += 40 * (nivo + 1);
+				 break;
+			 case 2:
+				 score += 100 * (nivo + 1);
+				 break;
+			 case 3:
+				 score += 300 * (nivo + 1);
+				 break;
+			 case 4:
+				 score += 1200 * (nivo + 1);
+				 break;
+		 }
+		 linije += brLn;
+				 
+		 //for (int i = 0; i <= brLn; i++)
+		 //score = 40 * (nivo + 1) 	100 * (nivo + 1) 	300 * (nivo + 1) 	1200 * (nivo + 1);
 	 }
+	 
+	 public void gameEnd() {
+		 // provjera da li je moguće postaviti novi lik na vrh ploče
+		 System.exit(0);
+	 }
+	 
+	 /**
+	  * Metoda koja se zove svakih 50ms preko timera
+	  */
+	 public void run() {
+		 pomakTetromino += gravity[nivo] * 3f;
+		 
+		 while (pomakTetromino > 1) {
+			 if (!pomakniDole()) {
+				 spusti();
+				 break;         
+			 }
+			 tetrisPanel.repaint();
+			 pomakTetromino -= 1;
+		 }
+	 }
+	 
 	/**
 	 * @return the score
 	 */

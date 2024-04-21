@@ -3,6 +3,9 @@
  */
 package hr.ets.matej.tetris;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
@@ -41,14 +44,28 @@ public class TetrisPanel extends JPanel implements KeyListener {
 	private Graphics g = null;
 	
 	private GamePlay gamePlay;
+	
+	/**
+	 * Font za ispis brojeva.
+	 */
+	private Font fontBrojevi = new Font(Font.MONOSPACED, Font.PLAIN, 20);
 
-
+	/**
+	 * Font za ispis tekstova
+	 */
+	private Font fontTekst = new Font("default", Font.BOLD, 16);
+	
+	/**
+	 * Font za prikaz bodova
+	 */
+	private Font fontBodovi = new Font(Font.MONOSPACED, Font.PLAIN, 16);
+	
 	/**
 	 * @param title
 	 * @throws HeadlessException
 	 */
 	public TetrisPanel() throws HeadlessException {
-		gamePlay = new GamePlay();
+		gamePlay = new GamePlay(this);
 		
 		addKeyListener(this);
 	}
@@ -65,26 +82,19 @@ public class TetrisPanel extends JPanel implements KeyListener {
 				nacrtajKvadratic(x + GAMEFIELD_POMAK_X, y + GAMEFIELD_POMAK_Y, GamePlay.getTetrominoColorXY(x, y));
 			}
 		}
+		
+		prikaziRezultat();
+		
+		prikaziNivo();
+		
+		prikaziSpusteneLinije();
 
-		/*
-		for (int r = 0; r < 7; r++) {
-			if (tetromino[r] != null) {
-				//tetromino[r].nacrtaj(this, 2 + 5 * (r / 4), (r % 4) * 5 + 2 );
-				tetromino[r].nacrtaj(this, 2 + 5 * (0), (r) * 5 + 2 );
-				 t = tetromino[r].kloniraj();
-				t.rotiraj(true);
-				t.nacrtaj(this, 2 + 5 * (1), (r) * 5 + 2 );
-				t.rotiraj(false);
-				t.nacrtaj(this, 2 + 5 * (2), (r) * 5 + 2 );
-			}
-		}
-		*/
 		Tetromino trenutni = gamePlay.getT();
 		trenutni.nacrtaj(this, GAMEFIELD_POMAK_X + gamePlay.getTx(), GAMEFIELD_POMAK_Y + gamePlay.getTy());
 		
 		// iscrtaj slijedću
 		Tetromino slijedeci = gamePlay.getNext();
-		slijedeci.nacrtaj(this, GAMEFIELD_POMAK_X + 12, GAMEFIELD_POMAK_Y + 2);
+		slijedeci.nacrtaj(this, GAMEFIELD_POMAK_X + 12, GAMEFIELD_POMAK_Y + 3);
 		
 	}
 
@@ -103,6 +113,54 @@ public class TetrisPanel extends JPanel implements KeyListener {
 		g.drawLine(xg, yg, xg, yg + GRID_SIZE - 2);
 		g.drawLine(xg, yg, xg + GRID_SIZE - 2, yg);
 	}
+	
+	/**
+	 * Metoda radi prikaz trnutnog rezultata. 
+	 */
+	private void prikaziRezultat() {
+		g.setColor(Color.BLACK);
+		g.setFont(fontTekst);
+		g.drawString("Bodovi:", (GAMEFIELD_POMAK_X + 12) * GRID_SIZE + 10, (GAMEFIELD_POMAK_Y + 1) * GRID_SIZE);
+		
+		String bodoviTekst = String.format("%08d", gamePlay.getScore());
+		int dx = izracunajPomakTeksta(bodoviTekst, fontBodovi);
+		
+		g.setFont(fontBodovi);
+		g.drawString(bodoviTekst, (GAMEFIELD_POMAK_X + 11) * GRID_SIZE + dx, (GAMEFIELD_POMAK_Y + 2) * GRID_SIZE);
+	}
+	/*
+	 * Metoda radi prikaz trnutnog nivoa.
+	 */
+	private void prikaziNivo() {
+		g.setColor(Color.BLACK);
+		g.setFont(fontTekst);
+		g.drawString("Nivo:", (GAMEFIELD_POMAK_X + 13) * GRID_SIZE, (GAMEFIELD_POMAK_Y + 9)* GRID_SIZE);
+		
+		String nivoTekst = String.format("%02d", gamePlay.getNivo() + 1);
+		int dx = izracunajPomakTeksta(nivoTekst, fontBrojevi);
+		
+		g.setFont(fontBrojevi);
+		g.drawString(nivoTekst, (GAMEFIELD_POMAK_X + 11) * GRID_SIZE + dx, (GAMEFIELD_POMAK_Y + 10) * GRID_SIZE + 6);
+	}
+	
+	private void prikaziSpusteneLinije() {
+		g.setColor(Color.BLACK);
+		g.setFont(fontTekst);
+		g.drawString("Linije:", (GAMEFIELD_POMAK_X + 13) * GRID_SIZE, (GAMEFIELD_POMAK_Y + 13)* GRID_SIZE);
+		
+		
+		String linijeTekst = String.format("%02d", gamePlay.getNivo() + 1);
+	    int dx = izracunajPomakTeksta(linijeTekst, fontBrojevi);
+	    
+		g.setFont(fontBrojevi);
+		g.drawString(linijeTekst, (GAMEFIELD_POMAK_X + 11) * GRID_SIZE + dx, (GAMEFIELD_POMAK_Y + 14) * GRID_SIZE + 6);
+	}
+	
+	private int izracunajPomakTeksta(String tekst, Font font) {
+		FontMetrics metrics = g.getFontMetrics(font);
+		// izracunaj x pomak za tekst
+	    return (GRID_SIZE * 6 - metrics.stringWidth(tekst)) / 2;
+	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
@@ -111,7 +169,7 @@ public class TetrisPanel extends JPanel implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		System.out.println("Key pressed code=" + e.getKeyCode() + ", char=" + e.getKeyChar());
+		//System.out.println("Key pressed code=" + e.getKeyCode() + ", char=" + e.getKeyChar());
 		
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			gamePlay.pomakniLijevo();
@@ -133,8 +191,8 @@ public class TetrisPanel extends JPanel implements KeyListener {
 			gamePlay.spusti();
 		}
 		
-		System.out.println(gamePlay.getT().toString());
-		System.out.println("tx: " + gamePlay.getTx() + ", ty: " + gamePlay.getTy());
+		//System.out.println(gamePlay.getT().toString());
+		//System.out.println("tx: " + gamePlay.getTx() + ", ty: " + gamePlay.getTy());
 		repaint();
 	}
 
