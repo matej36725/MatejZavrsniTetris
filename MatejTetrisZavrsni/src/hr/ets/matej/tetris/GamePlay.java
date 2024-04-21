@@ -181,7 +181,7 @@ public class GamePlay extends TimerTask {
 		 for (int y = 19; y > 0; y--) {
 			 boolean puno = true;
 			 //provjera dali je linija puna
-			 for (int x = 0; x < 9; x++) {
+			 for (int x = 0; x <= 9; x++) {
 				 if (polje[x][y] == INDEX_PRAZNO_POLJE) {
 					 puno = false;
 					 break;
@@ -192,7 +192,7 @@ public class GamePlay extends TimerTask {
 				 brLn += 1;
 				 //spusti sve linije iznad y za 1
 				 for (int y1 = y - 1; y1 >= 0; y1--) {
-					 for (int x = 0; x < 9; x++) {
+					 for (int x = 0; x <= 9; x++) {
 						 polje[x][y1 + 1] = polje[x][y1];
 					 }
 				 }
@@ -213,6 +213,7 @@ public class GamePlay extends TimerTask {
 				 score += 1200 * (nivo + 1);
 				 break;
 		 }
+		 
 		 linije += brLn;
 				 
 		 //for (int i = 0; i <= brLn; i++)
@@ -235,9 +236,10 @@ public class GamePlay extends TimerTask {
 				 spusti();
 				 break;         
 			 }
-			 tetrisPanel.repaint();
 			 pomakTetromino -= 1;
 		 }
+		 
+		 tetrisPanel.repaint();
 	 }
 	 
 	/**

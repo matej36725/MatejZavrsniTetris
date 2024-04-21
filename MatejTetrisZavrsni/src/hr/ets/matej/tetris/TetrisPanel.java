@@ -77,6 +77,9 @@ public class TetrisPanel extends JPanel implements KeyListener {
 		// pohrani graphics objekt
 		this.g = g;
 
+		//g.setColor(Color.BLACK);
+		//g.drawRect(GAMEFIELD_POMAK_X * GRID_SIZE, GAMEFIELD_POMAK_Y * GRID_SIZE, 10 * GRID_SIZE, 20 * GRID_SIZE);
+		
 		for (int x = 0; x < 10; x++) {
 			for (int y = 0; y < 20; y++) {
 				nacrtajKvadratic(x + GAMEFIELD_POMAK_X, y + GAMEFIELD_POMAK_Y, GamePlay.getTetrominoColorXY(x, y));
@@ -103,7 +106,7 @@ public class TetrisPanel extends JPanel implements KeyListener {
 		int yg = y * GRID_SIZE;
 
 		g.setColor(color.getSrednji());
-		g.fillRect(xg + 1, yg + 1, GRID_SIZE - 2, GRID_SIZE - 2);
+		g.fillRect(xg, yg, GRID_SIZE - 1, GRID_SIZE - 1);
 
 		g.setColor(color.getTamni());
 		g.drawLine(xg + GRID_SIZE - 1, yg, xg + GRID_SIZE - 1, yg + GRID_SIZE - 1);
@@ -149,7 +152,7 @@ public class TetrisPanel extends JPanel implements KeyListener {
 		g.drawString("Linije:", (GAMEFIELD_POMAK_X + 13) * GRID_SIZE, (GAMEFIELD_POMAK_Y + 13)* GRID_SIZE);
 		
 		
-		String linijeTekst = String.format("%02d", gamePlay.getNivo() + 1);
+		String linijeTekst = String.format("%03d", gamePlay.getLinije());
 	    int dx = izracunajPomakTeksta(linijeTekst, fontBrojevi);
 	    
 		g.setFont(fontBrojevi);
