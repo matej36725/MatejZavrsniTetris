@@ -49,7 +49,7 @@ public class GamePlay {
 		tetromino[0] = new Tetromino(new Point(1, 0, 0), new Point(1, 1, 0), new Point(1, 2, 0), new Point(1, 3, 0)); // I
 		tetromino[1] = new Tetromino(new Point(1, 0, 1), new Point(1, 1, 1), new Point(1, 2, 1), new Point(2, 0, 1)); // J
 		tetromino[2] = new Tetromino(new Point(1, 0, 2), new Point(1, 1, 2), new Point(1, 2, 2), new Point(2, 2, 2)); // L
-		tetromino[3] = new Tetromino(new Point(1, 2, 3), new Point(2, 1, 3), new Point(2, 2, 3), new Point(2, 3, 3)); // T
+		tetromino[3] = new Tetromino(new Point(1, 1, 3), new Point(2, 0, 3), new Point(2, 1, 3), new Point(2, 2, 3)); // T
 		tetromino[4] = new Tetromino(new Point(1, 1, 4), new Point(1, 2, 4), new Point(2, 2, 4), new Point(2, 1, 4)); // O
 		tetromino[5] = new Tetromino(new Point(1, 1, 5), new Point(1, 2, 5), new Point(2, 2, 5), new Point(2, 3, 5)); // S
 		tetromino[6] = new Tetromino(new Point(1, 3, 6), new Point(1, 2, 6), new Point(2, 2, 6), new Point(2, 1, 6)); // Z
@@ -72,14 +72,16 @@ public class GamePlay {
 		score = 0;
 		nivo = 1;
 		linije = 0;
-		next = odaberiRandomTetromino();
-		sljedeciTetromino();
+		
+		// postavi vrijednosti polja na prazno
 		for(int x = 0; x < 10; x++) {
 			for(int y = 0; y < 20; y++) {
 				polje[x][y] = INDEX_PRAZNO_POLJE;
 			}
 		}
 		
+		next = odaberiRandomTetromino();
+		sljedeciTetromino();
 	}
 	
 	public void sljedeciTetromino() {
@@ -95,7 +97,7 @@ public class GamePlay {
 
 	public Tetromino odaberiRandomTetromino() {
 		int i = (int) (Math.random() * 7.0);
-		return tetromino[i];
+		return tetromino[i].kloniraj();
 	}
 
 	public void pomakniLijevo() {
