@@ -25,7 +25,7 @@ public class Tetris extends JFrame {
 	 */
 	public static void main(String[] args) {
 		Tetris tetris = new Tetris("Tetris - Matej");
-		TetrisPanel tetrisPanel = new TetrisPanel();
+		TetrisPanel tetrisPanel = new TetrisPanel(tetris);
 		
 		// fokusiraj nakon prikazivanja
 		tetris.setAutoRequestFocus(true);

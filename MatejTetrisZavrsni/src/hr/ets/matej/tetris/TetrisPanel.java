@@ -11,6 +11,7 @@ import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
@@ -39,6 +40,11 @@ public class TetrisPanel extends JPanel implements KeyListener {
 	
 	
 	/**
+	 * Gravni prozor
+	 */
+	private JFrame tetris;
+	
+	/**
 	 * Koristi se za crtanje
 	 */
 	private Graphics g = null;
@@ -64,8 +70,10 @@ public class TetrisPanel extends JPanel implements KeyListener {
 	 * @param title
 	 * @throws HeadlessException
 	 */
-	public TetrisPanel() throws HeadlessException {
+	public TetrisPanel(JFrame tetris) throws HeadlessException {
 		gamePlay = new GamePlay(this);
+		
+		this.tetris = tetris;
 		
 		addKeyListener(this);
 	}
@@ -192,6 +200,7 @@ public class TetrisPanel extends JPanel implements KeyListener {
 		
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
 			gamePlay.spusti();
+			gamePlay.addScore(4);
 		}
 		
 		//System.out.println(gamePlay.getT().toString());
@@ -202,6 +211,13 @@ public class TetrisPanel extends JPanel implements KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		
+	}
+
+	/**
+	 * @return the tetris
+	 */
+	public JFrame getTetris() {
+		return tetris;
 	}
 
 }
