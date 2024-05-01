@@ -13,7 +13,7 @@ import java.util.TimerTask;
 import javax.swing.JOptionPane;
 
 /**
- * 
+ * Klasa koja definira logiku igre
  */
 public class GamePlay extends TimerTask {
 	/**
@@ -27,19 +27,19 @@ public class GamePlay extends TimerTask {
 	public static final int BROJ_LINIJA_PO_NIVOU = 10;
 
 	/**
-	 * Definicija tetris likova.
+	 * Definicija polja tetris likova.
 	 */
 	private static Tetromino[] tetromino = new Tetromino[7];
 
 	/**
-	 * definicija boja koje se koriste za pojedini lik ili njegove dijelove
+	 * Definicija boja koje se koriste za pojedini lik ili njegove dijelove.
 	 */
 	private static TetrominoColor[] tetrominoColor = new TetrominoColor[8];
 
 	/**
-	 * Igrače polje
+	 * Igraće polje(čuva indeks boje).
 	 */
-	private static int[][] polje = new int[10][20];
+	private int[][] polje = new int[10][20];
 
 	/**
 	 * Definira konstantu za pojedini novi - koliko se linija za 1 frame figura
@@ -52,18 +52,18 @@ public class GamePlay extends TimerTask {
 	 * Statička inicijalizacija
 	 */
 	static {
+		
 		// definicija boja (prema indeksima likova)
 		tetrominoColor[0] = new TetrominoColor(new Color(255, 5, 7), new Color(192, 0, 0), new Color(160, 2, 0));
 		tetrominoColor[1] = new TetrominoColor(new Color(255, 8, 255), new Color(191, 0, 192), new Color(152, 2, 164));
 		tetrominoColor[2] = new TetrominoColor(new Color(255, 255, 15), new Color(191, 190, 1), new Color(162, 163, 0));
-		tetrominoColor[3] = new TetrominoColor(new Color(164, 164, 164), new Color(115, 115, 115),
-				new Color(100, 100, 100));
+		tetrominoColor[3] = new TetrominoColor(new Color(164, 164, 164), new Color(115, 115, 115), new Color(100, 100, 100));
 		tetrominoColor[4] = new TetrominoColor(new Color(16, 255, 255), new Color(2, 192, 192), new Color(4, 133, 139));
 		tetrominoColor[5] = new TetrominoColor(new Color(5, 2, 255), new Color(16, 6, 175), new Color(14, 4, 138));
 		tetrominoColor[6] = new TetrominoColor(new Color(10, 255, 4), new Color(0, 191, 0), new Color(3, 131, 8));
+		
 		// boja praznog polja
-		tetrominoColor[INDEX_PRAZNO_POLJE] = new TetrominoColor(new Color(40, 40, 40), new Color(30, 30, 30),
-				new Color(10, 10, 10));
+		tetrominoColor[INDEX_PRAZNO_POLJE] = new TetrominoColor(new Color(40, 40, 40), new Color(30, 30, 30), new Color(10, 10, 10));
 
 		// definicja likova
 		tetromino[0] = new Tetromino(new Point(1, 0, 0), new Point(1, 1, 0), new Point(1, 2, 0), new Point(1, 3, 0)); // I
@@ -75,25 +75,82 @@ public class GamePlay extends TimerTask {
 		tetromino[6] = new Tetromino(new Point(1, 3, 6), new Point(1, 2, 6), new Point(2, 2, 6), new Point(2, 1, 6)); // Z
 	}
 
+	/**
+	 * Glavni panel za iscrtavanje likova.
+	 */
 	private TetrisPanel tetrisPanel;
+	
+	/**
+	 * Varijabla za pohranu bodova.
+	 */
 	private long score;
+	
+	/**
+	 * Varijabla za određivanje nivoa.
+	 */
 	private int nivo;
+	
+	/**
+	 * Varijabla za broj spuštenih linija.
+	 */
 	private int linije;
+	
+	/**
+	 * Sljedeći tetromino.
+	 */
 	private Tetromino next;
+	
+	/**
+	 * Trenutni tetromino.
+	 */
 	private Tetromino t;
+	
+	/**
+	 * Koordinate trenutnog tetromina.
+	 */
 	private int tx, ty;
+	
+	/**
+	 * Timer klasa koja se koristi za spuštanje lika pomoću "game tick".
+	 */
 	private Timer timer = new Timer();
+	
+	/**
+	 * Akumulirani pomak tetromino (ažurira se svaki "game tick")
+	 */
 	private float pomakTetromino;
+	
+	/**
+	 * Početno vrijeme (msec).
+	 */
 	private long startTime;
+	
+	/**
+	 * Ako je false ništa se ne događa u "game tick"
+	 */
 	private boolean igraPokrenuta = false;
-	float i = 1;
+	
+	/**
+	 * Broj i određuje prelaz na sljedeći nivo po broju linija.
+	 */
+	private float i = 1;
 
+	/**
+	 * Konstruktor koji pokreće novu igru, pohrani panel, i pokrene timer
+	 * 
+	 * @param tetrisPanel za crtanje igre
+	 */
 	public GamePlay(TetrisPanel tetrisPanel) {
 		newGame();
 		this.tetrisPanel = tetrisPanel;
+		
+		//pokreće "game tick" timer svakih 50 msec
 		timer.scheduleAtFixedRate(this, 0, 50);
 	}
 
+	/**
+	 * Metoda postavlja sve na nulu za novu igru, krece brojat timer
+	 */
 	public void newGame() {
 		score = 0L;
 		nivo = 0;
@@ -113,37 +170,71 @@ public class GamePlay extends TimerTask {
 
 	}
 
+	
+	/** 
+	 * Postavlja slijedeći tetromino na igraću ploču tako da uzme tetromino 
+	 * iz next polja, generira novi next i pokuša postaviti trenutni tetromino na vrh ploče.
+	 * Ako postavljanje nije moguće, završava igru.
+	 * 
+	 */
 	public void sljedeciTetromino() {
+		// reset akumuliranog pomaka
 		pomakTetromino = 0f;
+		
+		// zamjena trenutni i slijdeći
 		t = next;
+		
+		// generiraj novi slijedeći
 		next = odaberiRandomTetromino();
+		
+		// pokušaj smjestiti novi trenutni tetromino na vrh ploče
+		//  probaj na y pozicji -1, a ako nije moguće, probaj na poziciji 0
 		if (provjeriPozicijuTetromina(3, -1, t)) {
 			ty = -1;
 		} else if (provjeriPozicijuTetromina(3, 0, t)) {
 			ty = 0;
 		} else {
+			// nije bilo moguće smještanje novog tetromina - završi igru
 			gameEnd();
 		}
+		
+		// postavi x poziciju na centar igraće ploče
 		tx = 3;
 	}
 
+	/**
+	 * Generira random tetromino.
+	 * 
+	 * @return klon odabranog tetromina
+	 */
 	public Tetromino odaberiRandomTetromino() {
 		int i = (int) (Math.random() * 7.0);
 		return tetromino[i].kloniraj();
 	}
 
+	/**
+	 * Metoda provjerava dali je moguć pomak u lijevo te ako je smanjuje vrijednost x kordinate.
+	 */
 	public void pomakniLijevo() {
 		if (provjeriPozicijuTetromina(tx - 1, ty, t)) {
 			tx = tx - 1;
 		}
 	}
 
+	/**
+	 * Metoda provjerava dali je moguć pomak u desno te ako je povećava vrijednost x kordinate.
+	 */
 	public void pomakniDesno() {
 		if (provjeriPozicijuTetromina(tx + 1, ty, t)) {
 			tx = tx + 1;
 		}
 	}
 
+	/**
+	 * Metoda provjerava dali je moguć pomak u dole te ako je smanjava vrijednost y kordinate(vraća true ako je pomak obavljen).
+	 * 
+	 * @return true/false ako je pomak bio moguć/nemoguć
+	 */
 	public boolean pomakniDole() {
 		if (provjeriPozicijuTetromina(tx, ty + 1, t)) {
 			ty = ty + 1;
@@ -152,31 +243,54 @@ public class GamePlay extends TimerTask {
 		return false;
 	}
 
+	/**
+	 * Metoda za rotiranje tetromina i provjera dali je rotacija moguća(ako nije vraća nazad)
+	 * 
+	 * @param smjer
+	 */
 	public void rotiraj(boolean smjer) {
 		// smjer true - u smjeru kazaljke
 		// smjer false - suprotno od kazaljke
 		
 		// pokusaj rotirati u jednom smjer
-		t.rotiraj(!smjer);
+		t.rotiraj(smjer);
 		// provjeri poziciju
 		if (!provjeriPozicijuTetromina(tx, ty, t)) {
 			// vratu natrag - nije uspjela rotacija
-			t.rotiraj(smjer);
+			t.rotiraj(!smjer);
 		}
 	}
 
+	/**
+	 * Metoda koja instantno spusti lika na najnižu moguću lokaciju, kopira ga u polje, provjeri dali treba ukloniti linije,
+	 *  kreira sljedeći tetromino i doda 1 bod
+	 */
 	public void spusti() {
-		while (pomakniDole()) {
-		}
+		// radi pomak dolje dok god je moguć
+		while (pomakniDole());
 
 		// kopiraj figuru u polje
 		kopirajTetrominoUPolje(tx, ty, t);
+		
+		// "sruši" pune linije
 		ukloniPuneLinije();
+		
+		// generiraj i postavi slijedeći tetromino
 		sljedeciTetromino();
 		
+		// dodaj bodove
 		addScore(1);
 	}
 
+	/**
+	 * Provjerava da li svaka točka tetromina zadovoljava uvjete da ne izlazi iz polja i 
+	 * dali je lik na trenutnoj poziciju u koliziji sa likovima na ploči.
+	 * 
+	 * @param tx x kordinata lika
+	 * @param ty y kordinata lika
+	 * @param t tetromino
+	 * @return true/false ako zadovoljava/nezadovoljava uvjete.
+	 */
 	public boolean provjeriPozicijuTetromina(int tx, int ty, Tetromino t) {
 		Point[] points = t.getPoints();
 		for (int i = 0; i < 4; i++) {
@@ -193,6 +307,13 @@ public class GamePlay extends TimerTask {
 		return true;
 	}
 
+	/**
+	 * Kopira točke (indeks boje) tetromina u ploču.
+	 * 
+	 * @param tx kordinata tetromina
+	 * @param ty kordinata tetromina
+	 * @param t tetromino
+	 */
 	public void kopirajTetrominoUPolje(int tx, int ty, Tetromino t) {
 		Point[] points = t.getPoints();
 		for (int i = 0; i < 4; i++) {
@@ -200,12 +321,24 @@ public class GamePlay extends TimerTask {
 		}
 	}
 	
+	/**
+	 * Metoda koja pribraja zadane bodove ukupnom rezultatu.
+	 * 
+	 * @param score količina bodova za pribrajanje
+	 */
 	public void addScore(int score) {
 		this.score += score;
 	}
 
+	/**
+	 * Skenira cijelu ploču, traži pune linije, miče ih, "ruši" druge linije prema dolje
+	 * te povećava br linija za broj srušenih linija.
+	 * Zbraja bodove i provjera dali treba preći na sljedeći nivo.
+	 */
 	public void ukloniPuneLinije() {
 		int brLn = 0;
+		
+		//skeniranje i rušenje linija
 		for (int y = 19; y > 0; y--) {
 			boolean puno = true;
 			// provjera dali je linija puna
@@ -227,6 +360,7 @@ public class GamePlay extends TimerTask {
 			}
 		}
 
+		//pribrajanje bodova ovisno o broju srušenih linija
 		switch (brLn) {
 		case 1:
 			score += 40 * (nivo + 1);
@@ -242,6 +376,7 @@ public class GamePlay extends TimerTask {
 			break;
 		}
 
+		//povećanje broja srušenih linija
 		linije += brLn;
 		
 		// povećaj nivo ako treba
@@ -251,26 +386,36 @@ public class GamePlay extends TimerTask {
 		}
 	}
 
+	/**
+	 * 
+	 */
 	public void gameEnd() {
 		//zaustavi igru
 		igraPokrenuta = false;
 
 		Bodovi bodovi = new Bodovi(tetrisPanel.getTetris());
 
+		//podiže dijalog za upis imena igrača
 		String username = JOptionPane.showInputDialog(tetrisPanel, "Unesi korisničko ime:", "Unesi podatke", JOptionPane.PLAIN_MESSAGE);
 
+		//računa koliko je trajala igra(od trenutnog vremena oduzme početno vrijeme u msec)
 		Duration d = Duration.ofMillis(System.currentTimeMillis() - startTime);
+		
+		//vraća formatirano trajanje iz msec u obliku HH:MM:SS
 		String trajanje = String.format("%02d:%02d:%02d", d.toHoursPart(), d.toMinutesPart(), d.toSecondsPart());
 
+		//ako je unio ime igrača dodaj bodove, trajanje i ime u listu
 		if (username != null && !username.isBlank()) {
 			bodovi.dodajBodoveNaListu(username, score, trajanje);
 		}
 
+		// dohvaća bodove iz baze i popuni tablicu s prikazom bodova
 		bodovi.prikaziBodove();
 		
 		// centriraj u odnosu na glavni prozor
 		bodovi.setLocationRelativeTo(tetrisPanel);
 		
+		//detekcija događaaja zatvaranja prozora(pokreće novu igru kad je zatvoren prozor)
 		bodovi.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
@@ -278,31 +423,41 @@ public class GamePlay extends TimerTask {
 			}
 		});
 		
+		//prikaže prozor s bodovima
 		bodovi.setVisible(true);
 		
 		
 	}
 
 	/**
-	 * Metoda koja se zove svakih 50ms preko timera
+	 * Metoda koja se zove svakih 50ms preko timera.
 	 */
 	public void run() {
 		if (igraPokrenuta) {
+			//akumuliranje pomaka tetromina
+			// pomak je definiran kao gravity konstnata koja definira pomak u jednom frame-u (konstante kopirane sa stranice o tetrisu)
+			// kako 1s sadrži 60 frameova, jedan pomak je svakih MSF = (1/60)*1000ms
+			// game tick je 50ms, te je vrijednost potrebno pomnožiti sa 3 tj. sa 50ms/MSF.
 			pomakTetromino += gravity[nivo] * 3f;
 	
+			//pomiče teromino za 1 dok god je akumulirani pomak veći od 1
 			while (pomakTetromino > 1) {
-				if (!pomakniDole()) {
+				if (!pomakniDole()) { // pokušaj spustiti za 1
+					// spuštanje nije uspjelo - pozovi logiku igreka koja se zove ako je korisnik pritisnuo razmak
 					spusti();
 					break;
 				}
 				pomakTetromino -= 1;
 			}
 	
+			//iscrtaj novu situaciju na ploči
 			tetrisPanel.repaint();
 		}
 	}
 
 	/**
+	 * Vraća trenutne bodove.
+	 * 
 	 * @return the score
 	 */
 	public long getScore() {
@@ -310,6 +465,8 @@ public class GamePlay extends TimerTask {
 	}
 
 	/**
+	 * Vraća trenutni nivo (od 0).
+	 * 
 	 * @return the nivo
 	 */
 	public int getNivo() {
@@ -317,6 +474,8 @@ public class GamePlay extends TimerTask {
 	}
 
 	/**
+	 * Vraća trenutni broj srušenih linija.
+	 * 
 	 * @return the linije
 	 */
 	public int getLinije() {
@@ -324,6 +483,8 @@ public class GamePlay extends TimerTask {
 	}
 
 	/**
+	 * Vraća sljedeći tetromino.
+	 * 
 	 * @return the next
 	 */
 	public Tetromino getNext() {
@@ -331,6 +492,8 @@ public class GamePlay extends TimerTask {
 	}
 
 	/**
+	 * Vraća trenutni tetromino.
+	 * 
 	 * @return the t
 	 */
 	public Tetromino getT() {
@@ -338,6 +501,8 @@ public class GamePlay extends TimerTask {
 	}
 
 	/**
+	 * Vraća x kordinatu trenutnog tetromina.
+	 * 
 	 * @return the tx
 	 */
 	public int getTx() {
@@ -345,6 +510,8 @@ public class GamePlay extends TimerTask {
 	}
 
 	/**
+	 * Vraća y kordinatu trenutnog tetromina.
+	 * 
 	 * @return the ty
 	 */
 	public int getTy() {
@@ -354,20 +521,21 @@ public class GamePlay extends TimerTask {
 	/**
 	 * Vraća definiciju tetromino boje za dani indeks.
 	 * 
-	 * @param indeks
-	 * @return
+	 * @param indeks boje
+	 * @return TetrominoColor za zadani indeks.
 	 */
 	public static TetrominoColor getTetrominoColor(int indeks) {
 		return tetrominoColor[indeks];
 	}
 
 	/**
-	 * Vraća boju za zadane koordinate.
+	 * Vraća boju igračeg polja za zadane koordinate.
 	 * 
-	 * @param index
-	 * @return
+	 * @param x x koordinata polja
+	 * @param y y koordinata polja
+	 * @return TetrominoColor traženog polja
 	 */
-	public static TetrominoColor getTetrominoColorXY(int x, int y) {
+	public TetrominoColor getTetrominoColorXY(int x, int y) {
 		return tetrominoColor[polje[x][y]];
 	}
 

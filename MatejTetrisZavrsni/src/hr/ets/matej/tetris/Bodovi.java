@@ -16,25 +16,35 @@ import javax.swing.WindowConstants;
 import net.proteanit.sql.DbUtils;
 
 /**
- *
+ * Logika za prikaz bodova u dialogu.
+ * 
  * @author jakovljevic
  */
 @SuppressWarnings("serial")
 public class Bodovi extends JDialog {
     
-    Connection conn;
+    Connection conn; //konekcija na bazu
     ResultSet rs;   //podaci iz baze
-    PreparedStatement pst;
+    PreparedStatement pst; //sql upit
 
     /**
-     * Creates new form Bodovi
+     * kontruktor Bodovi
      */
     public Bodovi(JFrame parent) {
+    	//pozovi kontruktor iz proširene klase-postavlja naslov i modlanost dialoga
     	super(parent, "Top lista bodova", true);
-        initComponents();
-        conn = JavaConnect.connectDB();
+    	
+        //netbins inicijalizacija komponenti
+    	initComponents();
+        
+        //konekcija na bazu
+        conn = JavaConnect.connectDB(); 
+        
     }
 
+    /**
+     * Metoda za dohvat trenutne bodovne liste iz baze i priakz na prozoru.
+     */
     public void prikaziBodove() {
         try {
             String sql = "select row_number() over(ORDER BY Bodovi DESC) as '#', * from Igrac ORDER BY Bodovi DESC LIMIT 15"; //sql dohvaća listu rezultata po traženim uvjetima
@@ -45,15 +55,27 @@ public class Bodovi extends JDialog {
             JOptionPane.showMessageDialog(null, e);
         }
         
+        //uređivanje kolona tablice
         tablica.getColumnModel().getColumn(0).setPreferredWidth(20);
         tablica.getColumnModel().getColumn(1).setPreferredWidth(100);
         tablica.getColumnModel().getColumn(3).setPreferredWidth(140);
     }
     
+    
+    /**
+     * Metoda pohranjuje vrijednost bodova, ime korisnika i trajanje igre u bazu.
+     * 
+     * @param ime Ime korisnika
+     * @param bodovi Bodovi koje je korisnik ostvario
+     * @param trajanje Trajanje igre u formatu HH:MM:SS
+     */
     public void dodajBodoveNaListu(String ime, long bodovi, String trajanje){
         try {
-            String sql = "Insert into Igrac (Username, Bodovi, Vrijeme, Trajanje) values (?,?,datetime('now','localtime'),?)"; //sql za upis nove rezultata
-            pst = conn.prepareStatement(sql); //priprema sql naredbe
+        	//sql za upis nova rezultata
+            String sql = "Insert into Igrac (Username, Bodovi, Vrijeme, Trajanje) values (?,?,datetime('now','localtime'),?)"; 
+            
+            //priprema sql naredbe
+            pst = conn.prepareStatement(sql);
             
             //zadavanje parametara sql naredbe
             pst.setString(1, ime);

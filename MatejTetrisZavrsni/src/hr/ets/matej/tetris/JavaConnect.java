@@ -9,16 +9,19 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 /**
+ * Klasa za spajanje na SQLite JDBC bazu.
  *
  * @author 204-09
  */
 public class JavaConnect {
 
-    Connection con; //uspostava konekcije na bazu
+    Connection con; //konekcije na bazu
 
     public static Connection connectDB() {
 
         try {
+        	
+        	//treba za sql
             Class.forName("org.sqlite.JDBC");
             Connection conn = DriverManager.getConnection("jdbc:sqlite:Bodovi.db");
 
